@@ -1,26 +1,58 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { CreateCityDto } from './dto/create-city.dto';
 import { UpdateCityDto } from './dto/update-city.dto';
+import { InjectModel } from '@nestjs/sequelize';
+import { City } from './models/city.model';
 
 @Injectable()
 export class CitiesService {
-  create(createCityDto: CreateCityDto) {
-    return 'This action adds a new city';
+  constructor(@InjectModel(City) private cityRepo: typeof City) { }
+
+  async create(createCityDto: CreateCityDto) {
+    try {
+      await this.cityRepo.findOne({ where: { name: createCityDto.name } })
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException
+    }
+    const city = await this.cityRepo.findOne({ where: { name: createCityDto.name } })
+
+    if (!city) {
+      await this.cityRepo.create({ ...createCityDto });
+      const response = {
+        msg: "City created successfuly!"
+      }
+      return response;
+    } else {
+      throw new UnprocessableEntityException({
+        msg: "City alredy exists!"
+      })
+    }
   }
 
-  findAll() {
-    return `This action returns all cities`;
+  async findAll() {
+    return await this.cityRepo.findAll({include: {all: true}});
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} city`;
+  async findOne(id: number): Promise<City> {
+    return await this.cityRepo.findByPk(id, {include: {all: true}});
   }
 
-  update(id: number, updateCityDto: UpdateCityDto) {
-    return `This action updates a #${id} city`;
+  async update(id: number, updateCityDto: UpdateCityDto) {
+    await this.cityRepo.update(updateCityDto, { where: { id } })
+
+    const response = {
+      msg: "Update successfuly!"
+    }
+    return response;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} city`;
+  async remove(id: number) {
+    await this.cityRepo.destroy({ where: { id } });
+
+    const response = {
+      msg: "Delete successfuly!"
+    }
+    return response;
   }
 }

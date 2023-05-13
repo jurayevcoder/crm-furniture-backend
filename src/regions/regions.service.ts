@@ -1,26 +1,58 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { CreateRegionDto } from './dto/create-region.dto';
 import { UpdateRegionDto } from './dto/update-region.dto';
+import { InjectModel } from '@nestjs/sequelize';
+import { Region } from './models/region.model';
 
 @Injectable()
 export class RegionsService {
-  create(createRegionDto: CreateRegionDto) {
-    return 'This action adds a new region';
+  constructor(@InjectModel(Region) private regionRepo: typeof Region) { }
+
+  async create(createRegionDto: CreateRegionDto) {
+    try {
+      await this.regionRepo.findOne({ where: { name: createRegionDto.name } })
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException
+    }
+    const region = await this.regionRepo.findOne({ where: { name: createRegionDto.name } })
+
+    if (!region) {
+      await this.regionRepo.create({ ...createRegionDto });
+      const response = {
+        msg: "Region created successfuly!"
+      }
+      return response;
+    } else {
+      throw new UnprocessableEntityException({
+        msg: "Region alredy exists!"
+      })
+    }
   }
 
-  findAll() {
-    return `This action returns all regions`;
+  async findAll() {
+    return await this.regionRepo.findAll({include: {all: true}});
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} region`;
+  async findOne(id: number): Promise<Region> {
+    return await this.regionRepo.findByPk(id, {include: {all: true}});
   }
 
-  update(id: number, updateRegionDto: UpdateRegionDto) {
-    return `This action updates a #${id} region`;
+  async update(id: number, updateRegionDto: UpdateRegionDto) {
+    await this.regionRepo.update(updateRegionDto, { where: { id } })
+
+    const response = {
+      msg: "Update successfuly!"
+    }
+    return response;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} region`;
+  async remove(id: number) {
+    await this.regionRepo.destroy({ where: { id } });
+
+    const response = {
+      msg: "Delete successfuly!"
+    }
+    return response;
   }
 }

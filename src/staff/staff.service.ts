@@ -124,12 +124,12 @@ export class StaffService {
   }
 
   async findAll() {
-    const staff = await this.staffRepo.findAll();
+    const staff = await this.staffRepo.findAll({include: {all: true}});
     return staff;
   }
 
   async findOne(id: number): Promise<Staff> {
-    return await this.staffRepo.findByPk(id);
+    return await this.staffRepo.findByPk(id, {include: {all: true}});
   }
 
   async update(id: number, updateStaffDto: UpdateStaffDto) {
