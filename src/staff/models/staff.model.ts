@@ -2,7 +2,7 @@ import { Column, DataType, HasMany, Model, Table } from "sequelize-typescript";
 import { Contact } from "src/contacts/models/contact.model";
 import { Order } from "src/orders/models/order.model";
 import { Product } from "src/products/models/product.model";
-
+// import { v4 as uuidv4, v4 } from 'uuid';
 
 interface SatffAttr {
     full_name: string,
@@ -20,7 +20,7 @@ export class Staff extends Model<Staff, SatffAttr>{
     @Column({
         type: DataType.INTEGER,
         autoIncrement: true,
-        primaryKey: true
+        primaryKey: true,
     })
     id: number;
 
@@ -65,12 +65,12 @@ export class Staff extends Model<Staff, SatffAttr>{
     })
     hashed_token: string
 
-    @HasMany(() => Product)
-    product: Product
+    // @HasMany(() => Product)
+    // product: Product
 
-    @HasMany(() => Contact)
-    contact: Contact
+    // @HasMany(() => Contact)
+    // contact: Contact
 
-    @HasMany(() => Order)
-    order: Order
+    // @HasMany(() => Order)
+    // order: Order
 }
