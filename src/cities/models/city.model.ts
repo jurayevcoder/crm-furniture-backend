@@ -7,7 +7,7 @@ interface CityAttr {
     region_id: number;
 }
 
-@Table({tableName: "city"})
+@Table({ tableName: "city" })
 export class City extends Model<City, CityAttr>{
     @Column({
         type: DataType.INTEGER,
@@ -30,6 +30,6 @@ export class City extends Model<City, CityAttr>{
     @BelongsTo(() => Region)
     region: Region
 
-    // @HasMany(() => Order)
-    // order: Order
+    @HasMany(() => Order)
+    order: Order
 }

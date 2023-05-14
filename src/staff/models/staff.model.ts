@@ -65,12 +65,12 @@ export class Staff extends Model<Staff, SatffAttr>{
     })
     hashed_token: string
 
-    // @HasMany(() => Product)
-    // product: Product
+    @HasMany(() => Product)
+    product: Product
 
-    // @HasMany(() => Contact)
-    // contact: Contact
+    @HasMany(() => Contact)
+    contact: Contact
 
-    // @HasMany(() => Order)
-    // order: Order
+    @HasMany(() => Order)
+    order: Order
 }

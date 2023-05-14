@@ -1,26 +1,58 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
+import { InjectModel } from '@nestjs/sequelize';
+import { Contact } from './models/contact.model';
 
 @Injectable()
 export class ContactsService {
-  create(createContactDto: CreateContactDto) {
-    return 'This action adds a new contact';
+  constructor(@InjectModel(Contact) private contactRepo: typeof Contact) { }
+
+  async create(createContactDto: CreateContactDto) {
+    try {
+      await this.contactRepo.findOne({ where: { phone_number: createContactDto.phone_number } })
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException
+    }
+    const contact = await this.contactRepo.findOne({ where: { phone_number: createContactDto.phone_number } })
+
+    if (!contact) {
+      await this.contactRepo.create({ ...createContactDto });
+      const response = {
+        msg: "Contact created successfuly!"
+      }
+      return response;
+    } else {
+      throw new UnprocessableEntityException({
+        msg: "Contact alredy exists!"
+      })
+    }
   }
 
-  findAll() {
-    return `This action returns all contacts`;
+  async findAll() {
+    return await this.contactRepo.findAll({include: {all: true}});
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} contact`;
+  async findOne(id: number): Promise<Contact> {
+    return await this.contactRepo.findByPk(id, {include: {all: true}});
   }
 
-  update(id: number, updateContactDto: UpdateContactDto) {
-    return `This action updates a #${id} contact`;
+  async update(id: number, updateContactDto: UpdateContactDto) {
+    await this.contactRepo.update(updateContactDto, { where: { id } })
+
+    const response = {
+      msg: "Update successfuly!"
+    }
+    return response;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} contact`;
+  async remove(id: number) {
+    await this.contactRepo.destroy({ where: { id } });
+
+    const response = {
+      msg: "Delete successfuly!"
+    }
+    return response;
   }
 }

@@ -12,6 +12,9 @@ import { Staff } from './staff/models/staff.model';
 import { Category } from './categorys/models/category.model';
 import { Region } from './regions/models/region.model';
 import { City } from './cities/models/city.model';
+import { Contact } from './contacts/models/contact.model';
+import { Product } from './products/models/product.model';
+import { Order } from './orders/models/order.model';
 
 @Module({
   imports: [
@@ -23,7 +26,7 @@ import { City } from './cities/models/city.model';
       username: process.env.POSTGRES_USER,
       password: String(process.env.POSTGRES_PASSWORD),
       database: process.env.POSTGRES_DB,
-      models: [Staff, Category, Region, City],
+      models: [Staff, Category, Region, City, Contact, Product, Order],
       autoLoadModels: true,
       logging: false,
     }),
