@@ -10,5 +10,5 @@ export class ActivateStaffDto {
     @ApiProperty({example: "true or false", description: "Activate staff"})
     @IsBoolean()
     @IsNotEmpty()
-    value: string;
+    value: boolean;
 }
