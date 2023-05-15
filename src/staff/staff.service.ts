@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 import { Response } from 'express';
 import { SignInStaffDto } from './dto/signin.staff.dto';
 import { JwtService } from '@nestjs/jwt';
+import { clearConfigCache } from 'prettier';
+import { ActivateStaffDto } from './dto/activate-staff.dtp';
 
 @Injectable()
 export class StaffService {
@@ -73,22 +75,27 @@ export class StaffService {
     const staff = await this.staffRepo.findOne({ where: { login: signInStaffDto.login } })
     if (staff) {
       if (staff.password === signInStaffDto.password) {
-        const tokens = await this.getTokens(staff)
+        const token = await this.getTokens(staff)
 
-        const hashed_token = await bcrypt.hash(tokens.refresh_token, 7);
+        const hashed_token = await bcrypt.hash(token[0], 7);
 
         const updatedUser = await this.staffRepo.update(
           { hashed_token: hashed_token },
           { where: { id: staff.id }, returning: true },)
 
-        res.cookie('refreshToken', tokens.refresh_token, {
-          maxAge: 15 * 42 * 60 * 60 * 1000,
-          httpOnly: true,
-        });
+        // res.cookie('refreshToken', token[0], {
+        //   maxAge: 15 * 42 * 60 * 60 * 1000,
+        //   httpOnly: true,
+        // });
 
         const response = {
           msg: `${staff.role} signin`,
-          tokens,
+          token,
+          staff: {
+            id: `${staff.id}`,
+            role: `${staff.role}`,
+            is_active: `${staff.is_active}`
+          }
         }
         return response;
       } else {
@@ -123,13 +130,45 @@ export class StaffService {
 
   }
 
-  async findAll() {
-    const staff = await this.staffRepo.findAll({include: {all: true}});
-    return staff;
+  async activate(activateStaffDto: ActivateStaffDto) {
+    try {
+      await this.staffRepo.findOne({ where: { id: activateStaffDto.id } })
+    } catch (error) {
+      console.log(error);
+      throw new NotFoundException;
+    }
+    const staff = await this.staffRepo.findOne({ where: { id: activateStaffDto.id } })
+
+    if (staff) {
+      await this.staffRepo.update(  activateStaffDto, {
+        where: { id: activateStaffDto.id }
+      })
+    }
+  }
+
+  async findAll(query: string) {
+    console.log(query);
+    let totalPage = 1;
+    let a = 0;
+    const staff = await this.staffRepo.findAll({ include: { all: true } });
+    if (staff.length > 10) {
+      totalPage = staff.length % 10
+      if (staff.length / 2 !== 0) {
+        totalPage += 1;
+      }
+    }
+    return {
+      records: staff,
+      pagination: {
+        currentPage: query,
+        totalCount: staff.length,
+        totalPage
+      }
+    };
   }
 
   async findOne(id: number): Promise<Staff> {
-    return await this.staffRepo.findByPk(id, {include: {all: true}});
+    return await this.staffRepo.findByPk(id, { include: { all: true } });
   }
 
   async update(id: number, updateStaffDto: UpdateStaffDto) {
@@ -160,20 +199,27 @@ export class StaffService {
       role: staff.role,
       is_active: staff.is_active
     }
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(jwtPayload, {
-        secret: process.env.ACCESS_TOKEN_KEY,
-        expiresIn: process.env.ACCESS_TOKEN_TIME,
-      }),
+    // const [accessToken, refreshToken] = await Promise.all([
+    //   this.jwtService.signAsync(jwtPayload, {
+    //     secret: process.env.ACCESS_TOKEN_KEY,
+    //     expiresIn: process.env.ACCESS_TOKEN_TIME,
+    //   }),
+    //   this.jwtService.signAsync(jwtPayload, {
+    //     secret: process.env.REFRESH_TOKEN_KEY,
+    //     expiresIn: process.env.REFRESH_TOKEN_TIME,
+    //   })
+    // ])
+    // return {
+    //   access_tokken: accessToken,
+    //   refresh_token: refreshToken,
+    // };
+
+    return await Promise.all([
       this.jwtService.signAsync(jwtPayload, {
         secret: process.env.REFRESH_TOKEN_KEY,
         expiresIn: process.env.REFRESH_TOKEN_TIME,
       })
     ])
-    return {
-      access_tokken: accessToken,
-      refresh_token: refreshToken,
-    };
   }
 
   async refreshToken(user_id: number, refreshToken: string, res: Response) {
@@ -193,23 +239,23 @@ export class StaffService {
       throw new ForbiddenException('Forbidden');
     }
 
-    const tokens = await this.getTokens(staff)
+    const token = await this.getTokens(staff)
 
-    const hashed_token = await bcrypt.hash(tokens.refresh_token, 7);
+    const hashed_token = await bcrypt.hash(token[0], 7);
 
     const updatedUser = await this.staffRepo.update(
       { hashed_token: hashed_token },
       { where: { id: staff.id }, returning: true },)
 
-    res.cookie('refresh_token', tokens.refresh_token, {
-      maxAge: 15 * 42 * 60 * 60 * 1000,
-      httpOnly: true,
-    });
+    // res.cookie('refresh_token', tokens.refresh_token, {
+    //   maxAge: 15 * 42 * 60 * 60 * 1000,
+    //   httpOnly: true,
+    // });
 
     const response = {
       message: 'User logged in',
       user: updatedUser[1][0],
-      tokens,
+      token,
     }
     return response;
   }

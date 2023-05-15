@@ -10,6 +10,8 @@ const start = async () => {
     const app = await NestFactory.create(AppModule);
     const PORT = process.env.PORT || 9000;
 
+    app.enableCors()
+
     app.use(cookieParser());
     app.setGlobalPrefix('api');
     app.useGlobalPipes(new ValidationPipe());
