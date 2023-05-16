@@ -8,8 +8,6 @@ interface ProductAttr {
     image: string;
     price: string;
     category_id: number;
-    satff_id: number;
-    description: string;
 }
 
 
@@ -48,19 +46,14 @@ export class Product extends Model<Product, ProductAttr>{
     @BelongsTo(() => Category)
     category: Category
 
-    @ForeignKey(() => Staff)
-    @Column({
-        type: DataType.INTEGER
-    })
-    staff_id: number;
-    @BelongsTo(() => Staff)
-    staff: Staff
+    // @ForeignKey(() => Staff)
+    // @Column({
+    //     type: DataType.INTEGER
+    // })
+    // staff_id: number;
+    // @BelongsTo(() => Staff)
+    // staff: Staff
 
-    @Column({
-        type: DataType.STRING,
-        allowNull: false,
-    })
-    description: string;
 
     @HasMany(() => Order)
     order: Order

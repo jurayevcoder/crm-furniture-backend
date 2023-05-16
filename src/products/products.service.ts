@@ -30,8 +30,46 @@ export class ProductsService {
     }
   }
 
-  async findAll() {
-    return await this.productRepo.findAll({ include: { all: true } });
+  async findAll(query: string) {
+    console.log(query);
+    let a = 9;
+    let list = [];
+    let lists = [];
+    let page = { query };
+    let response: any;
+    const product = await this.productRepo.findAll({ include: { all: true } });
+    for (let i = 0; i < product.length; i++) {
+      if (i <= a) {
+        list.push(product[i])
+      }
+      if (i == a) {
+        lists.push(list)
+        a += list.length
+        list = []
+      }
+      if (i == product.length - 1 && list[0]) {
+        lists.push(list)
+        a += list.length
+        list = []
+      }
+    }
+
+
+    for (let i in page) {
+      for (let j in page[i]) {
+        let idx = Number(page[i][j]);
+        response = {
+          records: lists[idx - 1],
+          pagination: {
+            currentPage: query,
+            totalCount: product.length,
+            totalPage: lists.length
+          }
+        }
+      }
+    }
+    return response;
+
   }
 
   async findOne(id: number): Promise<Product> {

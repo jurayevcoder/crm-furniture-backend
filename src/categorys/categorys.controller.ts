@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Query } from '@nestjs/common';
 import { CategorysService } from './categorys.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -23,8 +23,8 @@ export class CategorysController {
   @Roles("SUPER-ADMIN", "ADMIN")
   @UseGuards(RolesGuard)
   @Get('find-all')
-  async findAll() {
-    return this.categorysService.findAll();
+  async findAll(@Query() query: string) {
+    return this.categorysService.findAll(query);
   }
 
   @ApiOperation({ summary: "Category find by id" })

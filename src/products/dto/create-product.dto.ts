@@ -21,14 +21,4 @@ export class CreateProductDto {
     @IsNumber()
     @IsNotEmpty()
     category_id: number;
-
-    @ApiProperty({ example: "1", description: "Staff id" })
-    @IsNumber()
-    @IsNotEmpty()
-    staff_id: number;
-
-    @ApiProperty({ example: "description", description: "Product description" })
-    @IsString()
-    @IsNotEmpty()
-    description: string;
 }
