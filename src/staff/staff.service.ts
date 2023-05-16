@@ -140,31 +140,67 @@ export class StaffService {
     const staff = await this.staffRepo.findOne({ where: { id: activateStaffDto.id } })
 
     if (staff) {
-      await this.staffRepo.update(  activateStaffDto, {
-        where: { id: activateStaffDto.id }
-      })
+      if (staff.dataValues.is_active !== activateStaffDto.is_active) {
+        await this.staffRepo.update(activateStaffDto, {
+          where: { id: activateStaffDto.id }
+        })
+        return {
+          msg: `${activateStaffDto.id} - employee active - ${activateStaffDto.is_active}`
+        }
+      } else {
+        throw new NotFoundException({
+          msg: `${activateStaffDto.id} - employee active alredy - ${activateStaffDto.is_active}`
+        })
+      }
+    } else {
+      throw new NotFoundException({
+        msg: `${activateStaffDto.id} - employee not found!`
+      });
     }
   }
 
   async findAll(query: string) {
     console.log(query);
-    let totalPage = 1;
-    let a = 0;
+    let totalPage = 0;
+    let a = 9;
+    let list = []
+    let lists = []
+    let page = { query }
+    let response: any;
     const staff = await this.staffRepo.findAll({ include: { all: true } });
-    if (staff.length > 10) {
-      totalPage = staff.length % 10
-      if (staff.length / 2 !== 0) {
-        totalPage += 1;
+    for (let i = 0; i < staff.length; i++) {
+      if (i <= a) {
+        list.push(staff[i])
+      }
+      if (i == a) {
+        lists.push(list)
+        a += list.length
+        list = []
+      }
+      if (i == staff.length - 1 && list[0]) {
+        if (list[0]) {
+          lists.push(list)
+          a += list.length
+          list = []
+        }
       }
     }
-    return {
-      records: staff,
-      pagination: {
-        currentPage: query,
-        totalCount: staff.length,
-        totalPage
+
+
+    for (let i in page) {
+      for (let j in page[i]) {
+        let idx = Number(page[i][j]);
+        response = {
+          records: lists[idx - 1],
+          pagination: {
+            currentPage: query,
+            totalCount: staff.length,
+            totalPage: lists.length
+          }
+        }
       }
-    };
+    }
+    return response;
   }
 
   async findOne(id: number): Promise<Staff> {

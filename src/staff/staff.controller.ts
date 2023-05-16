@@ -51,8 +51,10 @@ export class StaffController {
   }
 
   @ApiOperation({ summary: "User find all" })
+  @Roles("SUPER-ADMIN")
+  @UseGuards(RolesGuard)
   @Get("find-all")
-  async findAll(@Query() query:string) {
+  async findAll(@Query() query: string) {
     return this.staffService.findAll(query);
   }
 
