@@ -178,11 +178,9 @@ export class StaffService {
         list = []
       }
       if (i == staff.length - 1 && list[0]) {
-        if (list[0]) {
-          lists.push(list)
-          a += list.length
-          list = []
-        }
+        lists.push(list)
+        a += list.length
+        list = []
       }
     }
 

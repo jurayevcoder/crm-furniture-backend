@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateContactDto {
     @ApiProperty({example: "+998901234567", description: "Phone number"})
@@ -12,8 +12,8 @@ export class CreateContactDto {
     @IsNotEmpty()
     staff_id: number;
 
-    @ApiProperty({example: "busy | non exist | cancel", description: "Status phone number"})
-    @IsString()
+    @ApiProperty({example: "true or false", description: "Status phone number"})
+    @IsBoolean()
     @IsNotEmpty()
-    status: string;
+    status: boolean;
 }

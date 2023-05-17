@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Query } from '@nestjs/common';
 import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
@@ -12,7 +12,7 @@ export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
 
   @ApiOperation({ summary: "Contact create" })
-  @Roles("SUPER-ADMIN", "ADMIN")
+  @Roles("SUPER-ADMIN", "OPERATOR")
   @UseGuards(RolesGuard)
   @Post('create')
   async create(@Body() createContactDto: CreateContactDto) {
@@ -20,15 +20,15 @@ export class ContactsController {
   }
 
   @ApiOperation({ summary: "Contact find all" })
-  @Roles("SUPER-ADMIN", "ADMIN")
+  @Roles("SUPER-ADMIN", "OPERATOR")
   @UseGuards(RolesGuard)
   @Get('find-all')
-  async findAll() {
-    return this.contactsService.findAll();
+  async findAll(@Query() query: string) {
+    return this.contactsService.findAll(query);
   }
 
   @ApiOperation({ summary: "Contact find by id" })
-  @Roles("SUPER-ADMIN", "ADMIN")
+  @Roles("SUPER-ADMIN", "OPERATOR")
   @UseGuards(RolesGuard)
   @Get('find/:id')
   async findOne(@Param('id') id: string) {
@@ -36,7 +36,7 @@ export class ContactsController {
   }
 
   @ApiOperation({ summary: "Contact update by id" })
-  @Roles("SUPER-ADMIN", "ADMIN")
+  @Roles("SUPER-ADMIN", "OPERATOR")
   @UseGuards(RolesGuard)
   @Put('update/:id')
   async update(@Param('id') id: string, @Body() updateContactDto: UpdateContactDto) {
@@ -44,7 +44,7 @@ export class ContactsController {
   }
 
   @ApiOperation({ summary: "Contact delete by id" })
-  @Roles("SUPER-ADMIN", "ADMIN")
+  @Roles("SUPER-ADMIN", "OPERATOR")
   @UseGuards(RolesGuard)
   @Delete('delete/:id')
   async remove(@Param('id') id: string) {
